@@ -1,0 +1,103 @@
+-- MySQL dump 10.13  Distrib 5.6.23, for Linux (x86_64)
+--
+-- Host: localhost    Database: ce2017
+-- ------------------------------------------------------
+-- Server version	5.6.23-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `lec_info`
+--
+
+DROP TABLE IF EXISTS `lec_info`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `lec_info` (
+  `room_num` int(10) DEFAULT NULL,
+  `lec_num` int(30) DEFAULT NULL,
+  `lec_name` varchar(50) DEFAULT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `lec_info`
+--
+
+LOCK TABLES `lec_info` WRITE;
+/*!40000 ALTER TABLE `lec_info` DISABLE KEYS */;
+INSERT INTO `lec_info` VALUES (1,1,'창의적공학설계'),(1,2,'프로그래밍1'),(2,3,'test_lecture');
+/*!40000 ALTER TABLE `lec_info` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `lec_time`
+--
+
+DROP TABLE IF EXISTS `lec_time`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `lec_time` (
+  `room_num` int(10) DEFAULT NULL,
+  `lec_num` int(30) DEFAULT NULL,
+  `day` char(3) DEFAULT NULL,
+  `start` time DEFAULT NULL,
+  `end` time DEFAULT NULL,
+  `day_num` int(1) DEFAULT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `lec_time`
+--
+
+LOCK TABLES `lec_time` WRITE;
+/*!40000 ALTER TABLE `lec_time` DISABLE KEYS */;
+INSERT INTO `lec_time` VALUES (1,1,'mon','16:30:00','17:45:00',1),(1,1,'tue','13:30:00','14:45:00',2),(1,2,'mon','15:00:00','16:15:00',1),(2,3,'fri','06:00:00','18:00:00',5);
+/*!40000 ALTER TABLE `lec_time` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `room_info`
+--
+
+DROP TABLE IF EXISTS `room_info`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `room_info` (
+  `room_num` int(10) NOT NULL,
+  `status` varchar(5) DEFAULT NULL,
+  `room_name` varchar(30) DEFAULT NULL,
+  PRIMARY KEY (`room_num`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `room_info`
+--
+
+LOCK TABLES `room_info` WRITE;
+/*!40000 ALTER TABLE `room_info` DISABLE KEYS */;
+INSERT INTO `room_info` VALUES (1,'lec','미래관20401'),(2,'empty','test_room');
+/*!40000 ALTER TABLE `room_info` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2017-11-21 19:37:21
