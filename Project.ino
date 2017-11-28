@@ -1,21 +1,21 @@
 #include <SPI.h>
 #include <Phpoc.h>
 #include <TimeLib.h>
-#include "TM1637.h"
+#include <TM1637.h>
 #include "button_LED.h"
 
 
 #define CLK 3
 #define DIO 2
 
-#define BUTTON1 7
-#define BUTTON2 6
-#define BUTTON3 5
+#define BUTTON1 10
+#define BUTTON2 9
+#define BUTTON3 8
 
-#define RLED 12
-#define YLED 11
-#define GLED 10
-#define BLED 9
+#define RLED 7
+#define YLED 6
+#define BLED 5
+#define GLED 4
 
 
 int yr, mo, da, hr, mi, sec;
@@ -23,50 +23,31 @@ int yr, mo, da, hr, mi, sec;
 TM1637 watchDisplay(CLK, DIO);
 
 
-char server_name[] = "121.128.151.144";
+//char server_name[] = "121.128.151.144";
+char server_name[] = "www.arduino.cc";
 PhpocClient client;
 PhpocDateTime datetime;
 
 void setup() {
   Serial.begin(9600);
   Phpoc.begin(PF_LOG_SPI | PF_LOG_NET);
+  
   if(client.connect(server_name, 80))
   {
     Serial.println("Connected to server");
-    client.println("GET /arduino_time.php?room_num=1&set=0 HTTP/1.0");
+    client.println("GET / HTTP/1.0");
+    //client.println("User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36");
     client.println();
   }
   else
     Serial.println("connection failed");
 
-  if(client.available())
-  {
-    char c = client.read();
-    Serial.print(c);
-  }
-
-  if(!client.connected())
-  {
-    Serial.println("disconnected");
-    client.stop();
-  }
-
-  
-  
-  int tt;
-  
-  tt = datetime.hour();
-  hr = tt;
-  tt = datetime.minute();
-  mi = tt;
-  tt = datetime.second();
-  sec = tt;
-  tt = datetime.day();
-  da = tt;
-  tt = datetime.month();
-  mo = tt;
-  tt = datetime.year();
-  yr = tt;
+  hr = datetime.hour();
+  mi = datetime.minute();
+  sec = datetime.second();
+  da = datetime.day();
+  mo = datetime.month();
+  yr = datetime.year();
   Serial.println(yr);
   Serial.println(mo);
   Serial.println(da);
@@ -75,7 +56,7 @@ void setup() {
   Serial.println(sec);
   
   setTime(hr, mi, sec, da, mo, yr);
-  
+
   watchDisplay.init();
   watchDisplay.set(BRIGHT_TYPICAL);
 
@@ -109,49 +90,47 @@ boolean debounceY(boolean lastY){
   return currentY;
 }
 
-boolean debounceG(boolean lastG){
-  boolean currentG = digitalRead(BUTTON3);
+boolean debounceB(boolean lastB){
+  boolean currentB = digitalRead(BUTTON3);
 
-  if(lastG != currentG){
+  if(lastB != currentB){
     delay(5);
-    currentG = digitalRead(BUTTON3);
+    currentB = digitalRead(BUTTON3);
   }
-  return currentG;
+  return currentB;
 }
 
 void button_LED(void){
   currentRButton = debounceR(lastRButton);
-  currentGButton = debounceG(lastGButton);
+  currentBButton = debounceB(lastBButton);
   currentYButton = debounceY(lastYButton);
   if(lastRButton == LOW && currentRButton == HIGH){
     ledR = !ledR;
-    ledG = false;
+    ledB = false;
     ledY = false;
     if(ledR == false)
-      ledB = true;
-    else
-      ledB = false;
+      ledR = true;
   }
-  else if(lastGButton == LOW && currentGButton == HIGH){
-    ledG = !ledG;
+  else if(lastBButton == LOW && currentBButton == HIGH){
+    ledB = !ledB;
     ledR = false;
     ledY = false;
-    if(ledG == false)
-      ledB = true;
+    if(ledB == false)
+      ledR = true;
     else
-      ledB = false;
+      ledR = false;
   }
   else if(lastYButton == LOW && currentYButton == HIGH){
     ledY = !ledY;
     ledR = false;
-    ledG = false;
+    ledB = false;
     if(ledY == false)
-      ledB = true;
+      ledR = true;
     else
-      ledB = false;
+      ledR = false;
   }
   lastRButton = currentRButton;
-  lastGButton = currentGButton;
+  lastBButton = currentBButton;
   lastYButton = currentYButton;
 
   digitalWrite(RLED, ledR);
@@ -173,7 +152,7 @@ void watch(void){
   watchDisplay.display(1, listDisp[1]);
   watchDisplay.display(2, listDisp[2]);
   watchDisplay.display(3, listDisp[3]);
-  watchDisplay.point(POINT_ON);
+  //watchDisplay.point(POINT_ON);
    
   
 }
@@ -181,4 +160,18 @@ void watch(void){
 void loop() {
   button_LED();
   watch();
+
+  if(client.available())
+  {
+    char c = client.read();
+    Serial.print(c);
+  }
+
+  if(!client.connected())
+  {
+    Serial.println("disconnected");
+    client.stop();
+    while(1)
+    ;
+  }
 }
