@@ -10,9 +10,9 @@ if(client.connect(server_name, 80))
     Serial.println("Connected to server");
     char[] full_addr = "GET ";
     full_addr += addr;
-    full_addr += " HTTP/1.0";
-    //client.println("GET /arduino_time.php?room_num=1&set=0 HTTP/1.0");
-    client.println(full_addr);
+    full_addr += " HTTP/1.0"; // 이렇게세줄로써보거나
+    //client.println("GET /arduino_time.php?room_num=1&set=0 HTTP/1.0"); // 
+    client.println(full_addr);
     if(client.readLine("lec"){
           ledG = !ledG;
           ledR = false;
