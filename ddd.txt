@@ -1,0 +1,30 @@
+int mode;  // mode0=연결안함, mode1=현재시간, mode2=
+
+  
+void conn(char[] addr)
+{
+if(mode != 0){
+if(mode == 1){
+if(client.connect(server_name, 80))
+  {
+    Serial.println("Connected to server");
+    char[] full_addr = "GET ";
+    full_addr += addr;
+    full_addr += " HTTP/1.0";
+    //client.println("GET /arduino_time.php?room_num=1&set=0 HTTP/1.0");
+    client.println(full_addr);
+  }
+  else
+    Serial.println("connection failed");
+}
+
+
+  if(client.available())
+  {
+    char c = client.read();
+    Serial.print(c);
+  }else{
+   mode = 0;
+  }
+}
+}
