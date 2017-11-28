@@ -1,4 +1,4 @@
-int mode;  // mode0=�������, mode1=����ð�, mode2=
+int mode;  // mode0=¿¬°á¾ÈÇÔ, mode1=ÇöÀç½Ã°£, mode2=
 
   
 void conn(char[] addr)
@@ -13,6 +13,15 @@ if(client.connect(server_name, 80))
     full_addr += " HTTP/1.0";
     //client.println("GET /arduino_time.php?room_num=1&set=0 HTTP/1.0");
     client.println(full_addr);
+    if(client.readLine("lec"){
+          ledG = !ledG;
+          ledR = false;
+          ledY = false;
+          if(ledG == false)  
+            ledB = true; 
+          else  
+            ledB = false;
+          }
   }
   else
     Serial.println("connection failed");
