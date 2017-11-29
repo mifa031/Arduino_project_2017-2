@@ -9,7 +9,6 @@ body=''
 
 while(1):
     time.sleep(30)
-    print("1")
     for i in range(1,21):
         if i!=1:
             conn = client.HTTPConnection('127.0.0.1',80)
