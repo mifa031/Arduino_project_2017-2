@@ -52,6 +52,22 @@ void setup() {
   watchDisplay.set(BRIGHT_TYPICAL);
 }
 
+
+void sendInfo(String status){ // status = mono, share, empty 중 하나
+  String str = "GET /status.php?room_num=3&status=";
+  str.concat(status);
+  str.concat(" HTTP/1.0");
+  Serial.println(str);
+  if(client.connect(server_name, 80))
+   {
+       Serial.println("Connected to server");
+       //client.println("GET /status.php?room_num=3&status=share HTTP/1.0");
+       client.println(str);
+       client.println();
+   }
+   client.stop();
+}
+
 int mode0 = 1;
 String s = "";
 void getLec(){
