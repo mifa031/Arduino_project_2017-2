@@ -38,7 +38,7 @@ void getLec(){
     }
   }
 
-  if(second()%60 == 1){
+  if(second()%60 == 30){
     mode0 = 1;
   }
 
@@ -58,7 +58,7 @@ void getLec(){
 
   if(s.equals("lec")){
     Serial.println("Success");
-    // °­ÀÇÁß »óÅÂÀÏ¶§ ¼öÇàÇÒ ÄÚµå
+    // ê°•ì˜ì¤‘ ìƒíƒœì¼ë•Œ ìˆ˜í–‰í•  ì½”ë“œ
   }
 }
 
