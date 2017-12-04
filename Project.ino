@@ -1,84 +1,32 @@
 #include <SPI.h>
 #include <Phpoc.h>
 #include <TimeLib.h>
-#include "TM1637.h"
-#include "button_LED.h"
+#include <TM1637.h>
+#include "LEDsetting.h"
+
+#define BUTTON1 2
+#define BUTTON2 3
+#define BUTTON3 4
+
+#define RLED 5
+#define YLED 6
+#define BLED 7
+#define GLED 8
 
 
-#define CLK 3
-#define DIO 2
-
-#define BUTTON1 7
-#define BUTTON2 6
-#define BUTTON3 5
-
-#define RLED 12
-#define YLED 11
-#define GLED 10
-#define BLED 9
-
+#define CLK 10
+#define DIO 9
 
 int yr, mo, da, hr, mi, sec;
 
 TM1637 watchDisplay(CLK, DIO);
 
-
 char server_name[] = "121.128.151.144";
+
 PhpocClient client;
 PhpocDateTime datetime;
 
 void setup() {
-  Serial.begin(9600);
-  Phpoc.begin(PF_LOG_SPI | PF_LOG_NET);
-  if(client.connect(server_name, 80))
-  {
-    Serial.println("Connected to server");
-    client.println("GET /arduino_time.php?room_num=1&set=0 HTTP/1.0");
-    client.println();
-  }
-  else
-    Serial.println("connection failed");
-
-  if(client.available())
-  {
-    char c = client.read();
-    Serial.print(c);
-  }
-
-  if(!client.connected())
-  {
-    Serial.println("disconnected");
-    client.stop();
-  }
-
-  
-  
-  int tt;
-  
-  tt = datetime.hour();
-  hr = tt;
-  tt = datetime.minute();
-  mi = tt;
-  tt = datetime.second();
-  sec = tt;
-  tt = datetime.day();
-  da = tt;
-  tt = datetime.month();
-  mo = tt;
-  tt = datetime.year();
-  yr = tt;
-  Serial.println(yr);
-  Serial.println(mo);
-  Serial.println(da);
-  Serial.println(hr);
-  Serial.println(mi);
-  Serial.println(sec);
-  
-  setTime(hr, mi, sec, da, mo, yr);
-  
-  watchDisplay.init();
-  watchDisplay.set(BRIGHT_TYPICAL);
-
   pinMode(BUTTON1, INPUT);
   pinMode(BUTTON2, INPUT);
   pinMode(BUTTON3, INPUT);
@@ -87,71 +35,116 @@ void setup() {
   pinMode(YLED, OUTPUT);
   pinMode(GLED, OUTPUT);
   pinMode(BLED, OUTPUT);
+  
+  Serial.begin(9600);
+  Phpoc.begin(PF_LOG_SPI | PF_LOG_NET);  
+
+  hr = datetime.hour();
+  mi = datetime.minute();
+  sec = datetime.second();
+  da = datetime.day();
+  mo = datetime.month();
+  yr = datetime.year();
+  
+  setTime(hr, mi, sec, da, mo, yr);
+
+  watchDisplay.init();
+  watchDisplay.set(BRIGHT_TYPICAL);
 }
 
-boolean debounceR(boolean lastR){
-  boolean currentR = digitalRead(BUTTON1);
-
-  if(lastR != currentR){
-    delay(5);
-    currentR = digitalRead(BUTTON1);
+int mode0 = 1;
+String s = "";
+void getLec(){
+  if(mode0 == 1){
+    if(second()%60 == 0){
+      if(client.connect(server_name, 80))
+      {
+        Serial.println("Connected to server");
+        client.println("GET /status.php?room_num=3 HTTP/1.0");
+        client.println();
+        mode0 = 0;
+      }
+      else{
+        Serial.println("connection failed");
+        mode0 = 0;
+      }  
+    }
   }
-  return currentR;
-}
 
-boolean debounceY(boolean lastY){
-  boolean currentY = digitalRead(BUTTON2);
-
-  if(lastY != currentY){
-    delay(5);
-    currentY = digitalRead(BUTTON2);
+  if(second()%60 == 30){
+    mode0 = 1;
   }
-  return currentY;
-}
 
-boolean debounceG(boolean lastG){
-  boolean currentG = digitalRead(BUTTON3);
-
-  if(lastG != currentG){
-    delay(5);
-    currentG = digitalRead(BUTTON3);
+  Serial.println(client.available());
+  while(client.available())
+  {
+    char c = client.read();
+   // Serial.print(c);
+    s.concat(c);
+    if(c == '\r' || c== '\n')
+         s = "";
   }
-  return currentG;
+    Serial.println(s);
+  
+  delay(1000);
+  
+  if(!client.connected())
+  {
+    Serial.println("disconnected");
+    client.stop();
+  }
+  if(s.equals("lec")){
+    Serial.println("Success");
+    ledG = true;
+    ledR = false;
+    ledB = false;
+    ledY = false;
+  }
+  else{
+    if(ledB == true || ledY == true){
+    }
+    else{
+      ledR = true;
+      ledG = false;
+    }
+  }
 }
 
 void button_LED(void){
   currentRButton = debounceR(lastRButton);
-  currentGButton = debounceG(lastGButton);
+  currentBButton = debounceB(lastBButton);
   currentYButton = debounceY(lastYButton);
-  if(lastRButton == LOW && currentRButton == HIGH){
+
+  if(ledG == true)
+    ;
+  else if(lastRButton == LOW && currentRButton == HIGH){
     ledR = !ledR;
-    ledG = false;
+    ledB = false;
     ledY = false;
     if(ledR == false)
-      ledB = true;
-    else
-      ledB = false;
+      ledR = true;
   }
-  else if(lastGButton == LOW && currentGButton == HIGH){
-    ledG = !ledG;
+  else if(lastBButton == LOW && currentBButton == HIGH){
+    ledB = !ledB;
     ledR = false;
     ledY = false;
-    if(ledG == false)
-      ledB = true;
+    if(ledB == false)
+      ledR = true;
     else
-      ledB = false;
+      ledR = false;
   }
   else if(lastYButton == LOW && currentYButton == HIGH){
     ledY = !ledY;
     ledR = false;
-    ledG = false;
+    ledB = false;
     if(ledY == false)
-      ledB = true;
+      ledR = true;
     else
-      ledB = false;
+      ledR = false;
   }
+  
   lastRButton = currentRButton;
-  lastGButton = currentGButton;
+  lastBButton = currentBButton;
   lastYButton = currentYButton;
 
   digitalWrite(RLED, ledR);
@@ -174,11 +167,12 @@ void watch(void){
   watchDisplay.display(2, listDisp[2]);
   watchDisplay.display(3, listDisp[3]);
   watchDisplay.point(POINT_ON);
-   
-  
 }
 
 void loop() {
-  button_LED();
   watch();
+
+  getLec();
+  
+  button_LED();
 }
