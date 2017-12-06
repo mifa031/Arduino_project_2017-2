@@ -4,18 +4,18 @@
 #include <TM1637.h>
 #include "LEDsetting.h"
 
-#define BUTTON1 2
-#define BUTTON2 3
-#define BUTTON3 4
+#define BUTTON1 10
+#define BUTTON2 9   
+#define BUTTON3 8
 
-#define RLED 5
-#define YLED 6
-#define BLED 7
-#define GLED 8
+#define RLED 4
+#define YLED 5
+#define BLED 6
+#define GLED 7
 
 
-#define CLK 10
-#define DIO 9
+#define CLK 3
+#define DIO 2
 
 int yr, mo, da, hr, mi, sec;
 
@@ -52,31 +52,35 @@ void setup() {
   watchDisplay.set(BRIGHT_TYPICAL);
 }
 
-
 void sendInfo(String status){ // status = mono, share, empty 중 하나
-  String str = "GET /status.php?room_num=3&status=";
+  String str = "GET /status.php?room_num=1&status=";
   str.concat(status);
   str.concat(" HTTP/1.0");
   Serial.println(str);
   if(client.connect(server_name, 80))
    {
        Serial.println("Connected to server");
-       //client.println("GET /status.php?room_num=3&status=share HTTP/1.0");
+       //client.println("GET /status.php?room_num=1&status=share HTTP/1.0");
        client.println(str);
        client.println();
    }
+   while(client.available())
+  {
+    char c = client.read();
+  }
    client.stop();
 }
 
 int mode0 = 1;
 String s = "";
+
 void getLec(){
   if(mode0 == 1){
     if(second()%60 == 0){
       if(client.connect(server_name, 80))
       {
         Serial.println("Connected to server");
-        client.println("GET /status.php?room_num=3 HTTP/1.0");
+        client.println("GET /status.php?room_num=1 HTTP/1.0");
         client.println();
         mode0 = 0;
       }
@@ -102,8 +106,6 @@ void getLec(){
   }
     Serial.println(s);
   
-  delay(1000);
-  
   if(!client.connected())
   {
     Serial.println("disconnected");
@@ -117,11 +119,12 @@ void getLec(){
     ledY = false;
   }
   else{
-    if(ledB == true || ledY == true){
+    if(ledR == true || ledB == true || ledY == true){
     }
     else{
       ledR = true;
       ledG = false;
+      sendInfo("empty");
     }
   }
 }
@@ -139,24 +142,33 @@ void button_LED(void){
     ledY = false;
     if(ledR == false)
       ledR = true;
+    sendInfo("empty");
   }
   else if(lastBButton == LOW && currentBButton == HIGH){
     ledB = !ledB;
     ledR = false;
     ledY = false;
-    if(ledB == false)
+    if(ledB == false){
       ledR = true;
-    else
+      sendInfo("empty");
+    }
+    else{
       ledR = false;
+      sendInfo("mono");
+    }
   }
   else if(lastYButton == LOW && currentYButton == HIGH){
     ledY = !ledY;
     ledR = false;
     ledB = false;
-    if(ledY == false)
+    if(ledY == false){
       ledR = true;
-    else
+      sendInfo("empty");
+    }
+    else{
       ledR = false;
+      sendInfo("share");
+    }
   }
   
   lastRButton = currentRButton;
