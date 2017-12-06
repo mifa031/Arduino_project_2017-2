@@ -4,19 +4,22 @@
 #include <TM1637.h>
 #include "LEDsetting.h"
 
-#define BUTTON1 10
-#define BUTTON2 9   
-#define BUTTON3 8
+#define CLK_S 2
+#define LATCH 3
+#define SER 4
 
+#define BUTTON1 5
+#define BUTTON2 6   
+#define BUTTON3 7
+
+#define DIO 8
+#define CLK 9
+/*
 #define RLED 4
 #define YLED 5
 #define BLED 6
 #define GLED 7
-
-
-#define CLK 3
-#define DIO 2
-
+*/
 int yr, mo, da, hr, mi, sec;
 
 TM1637 watchDisplay(CLK, DIO);
@@ -31,11 +34,15 @@ void setup() {
   pinMode(BUTTON2, INPUT);
   pinMode(BUTTON3, INPUT);
 
+  pinMode(SER, OUTPUT);
+  pinMode(LATCH, OUTPUT);
+  pinMode(CLK_S, OUTPUT);
+/*
   pinMode(RLED, OUTPUT);
   pinMode(YLED, OUTPUT);
   pinMode(GLED, OUTPUT);
   pinMode(BLED, OUTPUT);
-  
+  */
   Serial.begin(9600);
   Phpoc.begin(PF_LOG_SPI | PF_LOG_NET);  
 
@@ -45,6 +52,12 @@ void setup() {
   da = datetime.day();
   mo = datetime.month();
   yr = datetime.year();
+  Serial.println(yr);
+  Serial.println(mo);
+  Serial.println(da);
+  Serial.println(hr);
+  Serial.println(mi);
+  Serial.println(sec);
   
   setTime(hr, mi, sec, da, mo, yr);
 
@@ -59,26 +72,31 @@ void sendInfo(String status){ // status = mono, share, empty 중 하나
   Serial.println(str);
   if(client.connect(server_name, 80))
    {
+     Serial.print("2");
        Serial.println("Connected to server");
        //client.println("GET /status.php?room_num=1&status=share HTTP/1.0");
        client.println(str);
        client.println();
    }
    while(client.available())
-  {
+  { 
+    Serial.print("3");
     char c = client.read();
   }
+  client.flush();
    client.stop();
 }
 
 int mode0 = 1;
 String s = "";
+int RLED = 1;
 
 void getLec(){
   if(mode0 == 1){
     if(second()%60 == 0){
       if(client.connect(server_name, 80))
       {
+        Serial.print("1");
         Serial.println("Connected to server");
         client.println("GET /status.php?room_num=1 HTTP/1.0");
         client.println();
@@ -95,7 +113,7 @@ void getLec(){
     mode0 = 1;
   }
 
-  Serial.println(client.available());
+  //Serial.println(client.available());
   while(client.available())
   {
     char c = client.read();
@@ -104,30 +122,30 @@ void getLec(){
     if(c == '\r' || c== '\n')
          s = "";
   }
-    Serial.println(s);
+    //Serial.println(s);
   
   if(!client.connected())
   {
-    Serial.println("disconnected");
+    //Serial.println("disconnected");
+    client.flush();
     client.stop();
   }
   if(s.equals("lec")){
     Serial.println("Success");
     ledG = true;
-    ledR = false;
+    /*ledR = false;
     ledB = false;
-    ledY = false;
+    ledY = false;*/
   }
   else{
-    if(ledR == true || ledB == true || ledY == true){
-    }
-    else{
-      ledR = true;
+    if(ledG == true){
       ledG = false;
-      sendInfo("empty");
+      RLED = 1;
     }
   }
 }
+
+int currentLED = 0;
 
 void button_LED(void){
   currentRButton = debounceR(lastRButton);
@@ -135,50 +153,47 @@ void button_LED(void){
   currentYButton = debounceY(lastYButton);
 
   if(ledG == true)
-    ;
+    currentLED = 1;
   else if(lastRButton == LOW && currentRButton == HIGH){
-    ledR = !ledR;
+    /*ledR = true;
     ledB = false;
-    ledY = false;
-    if(ledR == false)
-      ledR = true;
+    ledY = false;*/
+    currentLED = 8;
     sendInfo("empty");
   }
   else if(lastBButton == LOW && currentBButton == HIGH){
-    ledB = !ledB;
+    /*ledB = true;
     ledR = false;
-    ledY = false;
-    if(ledB == false){
-      ledR = true;
-      sendInfo("empty");
-    }
-    else{
-      ledR = false;
-      sendInfo("mono");
-    }
+    ledY = false;*/
+    currentLED = 2;
+    sendInfo("mono");
   }
   else if(lastYButton == LOW && currentYButton == HIGH){
-    ledY = !ledY;
+    /*ledY = true;
     ledR = false;
-    ledB = false;
-    if(ledY == false){
-      ledR = true;
-      sendInfo("empty");
-    }
-    else{
-      ledR = false;
-      sendInfo("share");
-    }
+    ledB = false;*/
+    currentLED = 4;
+    sendInfo("share");
+  }
+  else if(RLED == 1){
+    currentLED = 8;
+    sendInfo("empty");
+    RLED = 0;
   }
   
   lastRButton = currentRButton;
   lastBButton = currentBButton;
   lastYButton = currentYButton;
 
+  digitalWrite(LATCH, LOW);
+  shiftOut(SER, CLK_S, MSBFIRST, currentLED);
+  digitalWrite(LATCH, HIGH);
+/*
   digitalWrite(RLED, ledR);
   digitalWrite(GLED, ledG);
   digitalWrite(YLED, ledY);
   digitalWrite(BLED, ledB);
+  */
 }
 
 void watch(void){
