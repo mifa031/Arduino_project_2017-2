@@ -14,12 +14,7 @@
 
 #define DIO 8
 #define CLK 9
-/*
-#define RLED 4
-#define YLED 5
-#define BLED 6
-#define GLED 7
-*/
+
 int yr, mo, da, hr, mi, sec;
 
 TM1637 watchDisplay(CLK, DIO);
@@ -37,12 +32,7 @@ void setup() {
   pinMode(SER, OUTPUT);
   pinMode(LATCH, OUTPUT);
   pinMode(CLK_S, OUTPUT);
-/*
-  pinMode(RLED, OUTPUT);
-  pinMode(YLED, OUTPUT);
-  pinMode(GLED, OUTPUT);
-  pinMode(BLED, OUTPUT);
-  */
+
   Serial.begin(9600);
   Phpoc.begin(PF_LOG_SPI | PF_LOG_NET);  
 
@@ -52,12 +42,6 @@ void setup() {
   da = datetime.day();
   mo = datetime.month();
   yr = datetime.year();
-  Serial.println(yr);
-  Serial.println(mo);
-  Serial.println(da);
-  Serial.println(hr);
-  Serial.println(mi);
-  Serial.println(sec);
   
   setTime(hr, mi, sec, da, mo, yr);
 
@@ -93,7 +77,7 @@ int RLED = 1;
 
 void getLec(){
   if(mode0 == 1){
-    if(second()%60 == 0){
+    if(second()%60 == 0 || second()%60 == 10 || second()%60 == 20 || second()%60 == 30 || second()%60 == 40 || second()%60 == 50 ){
       if(client.connect(server_name, 80))
       {
         Serial.print("1");
@@ -109,7 +93,7 @@ void getLec(){
     }
   }
 
-  if(second()%60 == 30){
+  if(second()%60 == 5 || second()%60 == 15 || second()%60 == 25 || second()%60 == 35 || second()%60 == 45 || second()%60 == 55){
     mode0 = 1;
   }
 
@@ -133,9 +117,6 @@ void getLec(){
   if(s.equals("lec")){
     Serial.println("Success");
     ledG = true;
-    /*ledR = false;
-    ledB = false;
-    ledY = false;*/
   }
   else{
     if(ledG == true){
@@ -155,23 +136,14 @@ void button_LED(void){
   if(ledG == true)
     currentLED = 1;
   else if(lastRButton == LOW && currentRButton == HIGH){
-    /*ledR = true;
-    ledB = false;
-    ledY = false;*/
     currentLED = 8;
     sendInfo("empty");
   }
   else if(lastBButton == LOW && currentBButton == HIGH){
-    /*ledB = true;
-    ledR = false;
-    ledY = false;*/
     currentLED = 2;
     sendInfo("mono");
   }
   else if(lastYButton == LOW && currentYButton == HIGH){
-    /*ledY = true;
-    ledR = false;
-    ledB = false;*/
     currentLED = 4;
     sendInfo("share");
   }
@@ -188,12 +160,6 @@ void button_LED(void){
   digitalWrite(LATCH, LOW);
   shiftOut(SER, CLK_S, MSBFIRST, currentLED);
   digitalWrite(LATCH, HIGH);
-/*
-  digitalWrite(RLED, ledR);
-  digitalWrite(GLED, ledG);
-  digitalWrite(YLED, ledY);
-  digitalWrite(BLED, ledB);
-  */
 }
 
 void watch(void){

@@ -2,12 +2,6 @@
 #define BUTTON1 5
 #define BUTTON2 6
 #define BUTTON3 7
-/*
-#define RLED 7
-#define YLED 6
-#define BLED 5
-#define GLED 4
-*/
 #endif
 
 boolean lastRButton=LOW;
